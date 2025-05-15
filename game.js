@@ -1,80 +1,28 @@
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+let gameContainer = document.getElementById('game');
+let playBtn = document.getElementById('playBtn');
 
-let birdY = 200;
-let birdVelocity = 0;
-const gravity = 0.5;
-const flapPower = -8;
+const clickSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_0cfc16e90f.mp3');
+const winSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_13ff962637.mp3');
 
-let pipeX = 400;
-let pipeGap = 120;
-let pipeTop = Math.random() * 200 + 50;
+playBtn.addEventListener('click', () => {
+  clickSound.play();
+  startGame();
+});
 
-let score = 0;
-let gameOver = false;
-
-document.addEventListener("keydown", flap);
-canvas.addEventListener("click", flap);
-
-function flap() {
-  if (!gameOver) {
-    birdVelocity = flapPower;
-  } else {
-    location.reload(); // Restart game
-  }
+function startGame() {
+  gameContainer.innerHTML = '<p style="animation: pop 0.4s ease-in-out;">Let\'s play!</p>';
+  setTimeout(() => {
+    winSound.play();
+    gameContainer.innerHTML = '<p style="animation: pop 0.4s ease-in-out;">You Win!</p>';
+  }, 2000);
 }
 
-function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Bird
-  ctx.fillStyle = "yellow";
-  ctx.beginPath();
-  ctx.arc(100, birdY, 15, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Pipes
-  ctx.fillStyle = "green";
-  ctx.fillRect(pipeX, 0, 50, pipeTop); // top pipe
-  ctx.fillRect(pipeX, pipeTop + pipeGap, 50, canvas.height); // bottom pipe
-
-  // Score
-  ctx.fillStyle = "white";
-  ctx.font = "24px Arial";
-  ctx.fillText(`Score: ${score}`, 10, 30);
-}
-
-function update() {
-  if (gameOver) return;
-
-  birdVelocity += gravity;
-  birdY += birdVelocity;
-
-  pipeX -= 3;
-
-  // Pipe reset
-  if (pipeX < -50) {
-    pipeX = 400;
-    pipeTop = Math.random() * 200 + 50;
-    score++;
+// Add animation for pop effect
+const style = document.createElement('style');
+style.innerHTML = `
+  @keyframes pop {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
   }
-
-  // Collision detection
-  if (
-    birdY < 0 || birdY > canvas.height ||
-    (pipeX < 130 && pipeX > 70 && (birdY < pipeTop || birdY > pipeTop + pipeGap))
-  ) {
-    gameOver = true;
-    ctx.fillStyle = "red";
-    ctx.font = "36px Arial";
-    ctx.fillText("Game Over", 100, 300);
-    ctx.font = "20px Arial";
-    ctx.fillText("Press any key or click to restart", 60, 340);
-    return;
-  }
-
-  draw();
-  requestAnimationFrame(update);
-}
-
-update();
+`;
+document.head.appendChild(style);
